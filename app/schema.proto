@@ -1,0 +1,285 @@
+syntax = "proto3";
+
+message SMSG_ERROR {
+    int32 result = 1;
+    string error = 2;
+    int32 opcode = 3;
+}
+
+message CMSG_SERVER_CHECK { }
+
+message SMSG_SERVER_CHECK { }
+
+message CMSG_USER_LOGIN {
+    string email = 1;
+    string password = 2;
+    int32 unk1 = 4;
+}
+
+message SMSG_USER_LOGIN {
+    message Unk {
+        int32 unk1 = 1;
+        int32 unk2 = 2;
+    }
+
+    message Body {
+        int32 userId = 1;
+        string sessionId = 2;
+        bool remember = 3;
+        int32 deviceId = 5;
+        Unk unk = 6;
+    }
+
+    int32 result = 1;
+    Body body = 3;
+}
+
+message CMSG_SESSION_LOGIN {
+    string sessionId = 1;
+    bool isPwd = 2;
+    int32 unk1 = 3;
+    int32 unk2 = 4;
+    string unk3 = 5;
+}
+
+message SMSG_SESSION_LOGIN {
+    int32 result = 1;
+}
+
+message CMSG_DEVICE_INFO {
+    string sessionId = 1;
+    int32 deviceId = 2;
+}
+
+message SMSG_DEVICE_INFO {
+    message TaskList {
+        int32 orderId = 1;
+        bool enable = 2;
+        bool repeat = 3;
+        int32 weekday = 4;
+        int32 day_time = 5;
+    }
+
+    message Voice {
+        bool voiceMode = 1;
+        bool volume = 2;
+    }
+
+    message Config {
+        bool ecoMode = 1;
+        bool repeatClean = 2;
+        bool brokenEnable = 3;
+        bool carpetTurbo = 4;
+        bool historyMapEnable = 5;
+    }
+
+    message DeviceInfo {
+        int32 deviceId = 1;
+        Voice voice = 2;
+        Config config = 3;
+        TaskList taskList = 4;
+        OTA ota = 5;
+        Status status = 7;
+    }
+
+    message OTA {
+        bool newVersion = 1;
+        string packageSize = 2;
+        string systemVersion = 3;
+        string otaPackageVersion = 4;
+        string remoteUrl = 5;
+        bool forceupgrade = 6;
+    }
+
+    message Status {
+        bool isOpen = 1;
+        int32 beginTime = 2;
+        int32 endTime = 3;
+    }
+
+    int32 result = 1;
+    DeviceInfo body = 3;
+}
+
+message CMSG_DEVICE_LIST {
+    int32 userId = 1;
+    string sessionId = 2;
+    bool unk1 = 3;
+}
+
+message SMSG_DEVICE_LIST {
+    message DeviceList {
+        string serialNumber = 1;
+        int32 deviceId = 2;
+        int32 ctime = 3;
+        bool status = 4;
+        string alias = 5;
+        bool defaultId = 6;
+        string version = 7;
+        bool deviceAdmin = 8;
+        int32 deviceType = 9;
+        int32 powerValue = 10;
+        string ctrlVersion = 11;
+    }
+
+    message Body {
+        DeviceList deviceList = 1;
+    }
+
+    int32 result = 1;
+    Body body = 3;
+}
+
+message CMSG_DEVICE_POWER {
+    string sessionId = 1;
+    int32 deviceId = 2;
+}
+
+message SMSG_DEVICE_POWER {
+    message Power {
+        int32 value = 1;
+    }
+
+    message Body {
+        int32 deviceId = 1;
+        Power power = 2;
+        bool status = 3;
+    }
+
+    int32 result = 1;
+    Body body = 3;
+}
+
+message CMSG_CLEAN_RECORDS {
+    string sessionId = 1;
+    int32 deviceId = 2;
+    int32 fromDate = 3;
+    int32 toDate = 4;
+}
+
+message SMSG_CLEAN_RECORDS {
+    message Config {
+        bool ecoMode = 1;
+        bool repeatClean = 2;
+        int32 waterLevel = 6;
+    }
+
+    message CleanTask {
+        int32 taskId = 1;
+        int32 beginTime = 2;
+        int32 endTime = 3;
+        int32 totalArea = 4;
+        int32 totalTime = 5;
+        int32 cleanType = 6;
+        bool status = 7;
+        Config config = 8;
+        int32 mapId = 9;
+        string mapName = 10;
+        string planName = 11;
+    }
+
+    message Body {
+        repeated CleanTask cleanTask = 1;
+    }
+
+    int32 result = 1;
+    Body body = 3;
+}
+
+message CMSG_PING {}
+
+message SMSG_PING {
+    int32 result = 1;
+}
+
+message CMSG_CONNECT {}
+
+message SMSG_DEVICE_STATUS {
+    int32 mapHeadId = 1;
+    int32 areaCleanFlag = 2;
+    int32 workMode = 3;
+    int32 battery = 4;
+    bool chargeStatus = 5;
+    int32 type = 6;
+    int32 faultCode = 7;
+    int32 cleanPreference = 8;
+    int32 repeatClean = 9;
+    int32 cleanTime = 10;
+    int32 cleanSize = 11;
+    int32 waterLevel = 12;
+    int32 dustBoxType = 13;
+    bool mopType = 14;
+}
+
+message CMSG_DEVICE_TIME {}
+
+message SMSG_DEVICE_TIME {
+    message Body {
+        int32 deviceTime = 1;
+        int32 deviceTimezone = 2;
+    }
+
+    int32 result = 1;
+    Body body = 3;
+}
+
+message CMSG_MAP_INFO {
+    int32 mapType = 1;
+}
+
+message CMSG_CTRL_TYPE {
+    int32 mapHeadId = 1;
+    int32 ctrlType = 3;
+}
+
+message SMSG_CTRL_TYPE {
+    int32 result = 1;
+    int32 ctrlType = 3;
+}
+
+message SMSG_DEVICE_BUSY {
+    int32 result = 1;
+}
+
+message CMSG_LOCATE_DEVICE {}
+
+message SMSG_LOCATE_DEVICE {
+    int32 result = 1;
+}
+
+message SMSG_USER_LOGOUT {
+    int32 result = 1;
+    string reason = 2;
+}
+
+message SMSG_DISCONNECT {
+    int32 result = 1;
+}
+
+message CMSG_CLEAN_MODE {
+    int32 mode = 1;
+    int32 unk2 = 2;
+}
+
+message SMSG_CLEAN_MODE {}
+
+message CMSG_RETURN_HOME {
+    int32 unk1 = 1;
+}
+
+message SMSG_RETURN_HOME {
+    int32 result = 1;
+}
+
+message RobotPose {
+    int32 id = 1;
+    float x = 2;
+    float y = 3;
+    float phi = 4;
+}
+
+message RobotPosition {
+    int32 mapHeadId = 1;
+    bool update = 2;
+    RobotPose pose = 3;
+}
