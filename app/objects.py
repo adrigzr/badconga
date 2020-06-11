@@ -1,6 +1,6 @@
 """ objects """
 # pylint: disable=invalid-name,too-many-arguments,too-few-public-methods
-from .constants import State, FanMode, STATE_DOCKED, FAN_MODE_NONE
+from .constants import State, FanMode, CleanMode, STATE_DOCKED, FAN_MODE_NONE, CLEAN_MODE_AUTO
 
 class Packet:
     """ Packet """
@@ -27,4 +27,5 @@ class Device:
         self.battery_level = 0
         self.state: State = STATE_DOCKED
         self.fan_mode: FanMode = FAN_MODE_NONE
+        self.clean_mode: CleanMode = CLEAN_MODE_AUTO
         self.position = Position()
