@@ -2,7 +2,7 @@
 # pylint: disable=too-few-public-methods
 import logging
 from .constants import CTYPE
-from .objects import Packet
+from .entities import Packet
 from .helpers import pack
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,18 @@
 """ helpers """
 import time
 import struct
+from google.protobuf.json_format import MessageToDict
 from . import schema_pb2
 from .constants import OPNAMES
 from .opcode_handlers import OPCODE_HANDLERS
-from .objects import Packet
+from .entities import Packet
+
+def message_to_dict(schema):
+    """ message_to_dict """
+    result = MessageToDict(schema)
+    if 'mapGrid' in result:
+        del result['mapGrid']
+    return result
 
 def build_schema(packet: Packet):
     """ build_schema """
