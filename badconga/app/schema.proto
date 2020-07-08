@@ -224,7 +224,7 @@ message SMSG_DEVICE_TIME {
 }
 
 message CMSG_MAP_INFO {
-    required int32 mapType = 1;
+    required int32 mask = 1;
 }
 
 message CMSG_CTRL_TYPE {
@@ -279,6 +279,19 @@ message SMSG_SET_FAN_MODE {
     required int32 result = 1;
 }
 
+message CMSG_SET_CLEAN_MODE {
+    required int32 mode = 1;
+}
+
+message CMSG_UNK_1 {
+    required int32 unk1 = 1;
+    required bytes unk2 = 2;
+}
+
+message SMSG_UNK_1 {
+    required int32 result = 1;
+}
+
 message RobotPose {
     required int32 id = 1;
     required float x = 2;
@@ -290,4 +303,131 @@ message RobotPosition {
     required int32 mapHeadId = 1;
     required bool update = 2;
     required RobotPose pose = 3;
+}
+
+message StatusInfo {
+    required int32 mapHeadId = 2;
+    required int32 hasHistoryMap = 3;
+    required int32 workingMode = 4;
+    required int32 batteryPercent = 5;
+    required int32 chargeState = 6;
+    required int32 faultType = 7;
+    required int32 faultCode = 8;
+    required int32 cleanPreference = 9;
+    required int32 repeatClean = 10;
+    required int32 cleanTime = 11;
+    required int32 cleanSize = 12;
+}
+
+message MapHeadInfo {
+    required int32 mapHeadId = 1;
+    required int32 mapValid = 2;
+    required int32 mapType = 3;
+    required int32 sizeX = 4;
+    required int32 sizeY = 5;
+    required float minX = 6;
+    required float minY = 7;
+    required float maxX = 8;
+    required float maxY = 9;
+    required float resolution = 10;
+}
+
+message HistoryHeadInfo {
+    required int32 mapHeadId = 1;
+    required int32 pointNumber = 2;
+    required int32 poseId = 3;
+}
+
+message RobotChargeInfo {
+    required int32 mapHeadId = 1;
+    required float poseX = 2;
+    required float poseY = 3;
+    required float posePhi = 4;
+}
+
+message ListInfo {
+    required int32 mapHeadId = 1;
+    required int32 cleanPlanId = 2;
+    required int32 areaCount = 3;
+}
+
+message SpotInfo {
+    required int32 mapHeadId = 1;
+    required int32 ctrlValue = 2;
+    required float poseX = 3;
+    required float poseY = 4;
+    required float posePhi = 5;
+}
+
+message RobotPoseInfo {
+    required int32 mapHeadId = 1;
+    required int32 poseId = 2;
+    required int32 update = 3;
+    required float poseX = 4;
+    required float poseY = 5;
+    required float posePhi = 6;
+}
+
+message CleanPlanInfo {
+    required int32 mapHeadId = 1;
+    required int32 mask = 2;
+    required int32 firstCleanFlag = 3;
+}
+
+message MapInfo {
+    required int32 mapHeadId = 1;
+    required string mapName = 2;
+    required int32 currentCleanPlanId = 3;
+    required int32 taskId = 4;
+}
+
+message CleanRoom {
+    required int32 id = 1;
+    required string name = 2;
+    required int32 state = 3;
+    required float x = 4;
+    required float y = 5;
+}
+
+message AreaInfo {
+    required int32 id = 1;
+    required int32 type = 2;
+    repeated float x = 3;
+    repeated float y = 4;
+}
+
+message CleanRoomInfo {
+    required int32 id = 1;
+    required int32 type = 2;
+}
+
+message CleanPlan {
+    required int32 id = 1;
+    required string name = 2;
+    required int32 mapHeadId = 3;
+    repeated AreaInfo areaInfoList = 4;
+    repeated CleanRoomInfo cleanRoomInfoList = 5;
+}
+
+message RoomEnableInfo {
+    required int32 mapHeadId = 1;
+    required int32 size = 2;
+}
+
+message MapUpdate {
+    required int32 mask = 1;
+    required StatusInfo statusInfo = 2;
+    required MapHeadInfo mapHeadInfo = 3;
+    required bytes mapGrid = 4;
+    required HistoryHeadInfo historyHeadInfo = 5;
+    required RobotChargeInfo robotChargeInfo = 6;
+    required ListInfo wallListInfo = 7;
+    required ListInfo areaListInfo = 8;
+    required SpotInfo spotInfo = 9;
+    required RobotPoseInfo robotPoseInfo = 10;
+    required CleanPlanInfo cleanPlanInfo = 11;
+    repeated MapInfo mapInfoList = 12;
+    repeated CleanRoom cleanRoomList = 13;
+    repeated CleanPlan cleanPlanList = 14;
+    required RoomEnableInfo roomEnableInfo = 15;
 }

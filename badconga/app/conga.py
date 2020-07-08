@@ -2,14 +2,14 @@
 # pylint: disable=too-many-public-methods
 import logging
 import threading
-from google.protobuf.json_format import MessageToDict
 from . import schema_pb2
 from .evented import Evented
-from .objects import Device
+from .entities import Device
+from .map import Map
 from .builder import Builder
 from .socket import Socket
-from .constants import HOST, PORT, OPCODES, OPNAMES, FAN_MODES, CLEAN_MODES, STATES, FanMode, REVERSE_FAN_MODES
-from .helpers import unpack, build_schema
+from .constants import HOST, PORT, OPCODES, OPNAMES, FAN_MODES, FanMode, REVERSE_FAN_MODES
+from .helpers import unpack, build_schema, message_to_dict
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,11 @@ class Conga(Evented):
         self.session_id = None
         self.device = Device()
         self.builder = Builder()
+        self.map = Map()
         self.socket = Socket(HOST, PORT)
-        self.socket.on('recv', self.recv)
+        self.socket.on('connect', self.on_connect)
+        self.socket.on('recv', self.on_recv)
+        self.socket.on('disconnect', self.on_disconnect)
         self.on('set_session', self.on_set_session)
         self.on('login', self.on_login)
         self.on('update', self.on_update)
@@ -34,6 +37,8 @@ class Conga(Evented):
             'SMSG_PING': self.handle_ping,
             'SMSG_DISCONNECT': self.handle_disconnect,
             'SMSG_UPDATE_ROBOT_POSITION': self.handle_update_robot_position,
+            'SMSG_MAP_INFO': self.handle_map_update,
+            'SMSG_MAP_UPDATE': self.handle_map_update,
         }
 
     # private
@@ -43,16 +48,24 @@ class Conga(Evented):
         opcode = OPCODES[opname]
         data = self.builder.build(opcode, schema)
         self.socket.send(data)
-        logger.debug('[%s] %s', opname, MessageToDict(schema) if schema else '')
+        logger.debug('[%s] %s', opname, message_to_dict(schema) if schema else '')
 
-    def recv(self, data: bytes):
-        """ recv """
+    def on_connect(self):
+        """ on_connect """
+        self.restore_session()
+
+    def on_recv(self, data: bytes):
+        """ on_recv """
         packet = unpack(data)
         schema = build_schema(packet)
         opname = OPNAMES[packet.opcode] if packet.opcode in OPNAMES else packet.opcode
-        logger.debug('[%s] %s', opname, MessageToDict(schema) if schema else packet.payload.hex())
+        logger.debug('[%s] %s', opname, message_to_dict(schema) if schema else packet.payload.hex())
         if opname in self.handlers:
             self.handlers[opname](schema)
+
+    def on_disconnect(self):
+        """ on_disconnect """
+        self.device = Device()
 
     def connect_device(self):
         """ connect_device """
@@ -96,10 +109,14 @@ class Conga(Evented):
     def handle_device_status(self, schema):
         """ handle_device_status """
         self.device.battery_level = schema.battery
+        self.device.work_mode = schema.workMode
+        self.device.charge_status = schema.chargeStatus
+        self.device.clean_time = schema.cleanTime
+        self.device.clean_size = schema.cleanSize
+        self.device.type = schema.type
+        self.device.fault_code = schema.faultCode
         self.device.fan_mode = FAN_MODES[schema.cleanPreference]
-        self.device.clean_mode = CLEAN_MODES[schema.workMode]
-        self.device.state = STATES[schema.workMode]
-        self.trigger('update')
+        self.trigger('update_device')
 
     def handle_user_logout(self, schema):
         """ handle_user_logout """
@@ -113,20 +130,38 @@ class Conga(Evented):
 
     def handle_update_robot_position(self, schema):
         """ handleUpdateRobotPosition """
-        self.device.position.x = schema.pose.x
-        self.device.position.y = schema.pose.y
-        self.device.position.phi = schema.pose.phi
-        self.trigger('update')
+        self.map.robot.x = schema.pose.x
+        self.map.robot.y = schema.pose.y
+        self.map.robot.phi = schema.pose.phi
+        self.trigger('update_position')
+
+    def handle_map_update(self, schema):
+        """ handle_map_update """
+        self.map.grid = schema.mapGrid
+        self.map.size_x = schema.mapHeadInfo.sizeX
+        self.map.size_y = schema.mapHeadInfo.sizeY
+        self.map.min_x = schema.mapHeadInfo.minX
+        self.map.min_y = schema.mapHeadInfo.minY
+        self.map.max_x = schema.mapHeadInfo.maxX
+        self.map.max_y = schema.mapHeadInfo.maxY
+        self.map.charger.x = schema.robotChargeInfo.poseX
+        self.map.charger.y = schema.robotChargeInfo.poseY
+        self.map.charger.phi = schema.robotChargeInfo.posePhi
+        self.map.robot.x = schema.robotPoseInfo.poseX
+        self.map.robot.y = schema.robotPoseInfo.poseY
+        self.map.robot.phi = schema.robotPoseInfo.posePhi
+        self.trigger('update_map')
 
     # events
 
     def on_set_session(self):
         """ on_set_session """
-        self.restore_session()
+        self.socket.connect()
 
     def on_login(self):
         """ on_login """
         self.connect_device()
+        self.get_map_info()
         self.ping()
 
     def on_disconnect_device(self):
@@ -135,8 +170,9 @@ class Conga(Evented):
 
     def on_update(self):
         """ on_update """
-        logger.info('State: %s', self.device.__dict__)
-        logger.info('Position: %s', self.device.position.__dict__)
+        logger.info('State: state=%s, fan_mode=%s, clean_mode=%s, battery_level=%i',
+                    self.device.state, self.device.fan_mode, self.device.clean_mode,
+                    self.device.battery_level)
 
     # methods
 
@@ -158,6 +194,13 @@ class Conga(Evented):
     def locate(self):
         """ locate """
         self.send('CMSG_LOCATE_DEVICE')
+
+    def get_map_info(self):
+        """ get_map_info """
+        data = schema_pb2.CMSG_MAP_INFO()
+        data.mask = 0x78FF
+        self.send('CMSG_MAP_INFO', data)
+
 
     def turn_on(self):
         """ turn_on """
