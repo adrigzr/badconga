@@ -1,4 +1,5 @@
 """ conga """
+# pylint: disable=too-many-public-methods
 import logging
 import threading
 from google.protobuf.json_format import MessageToDict
@@ -35,6 +36,8 @@ class Conga(Evented):
             'SMSG_UPDATE_ROBOT_POSITION': self.handle_update_robot_position,
         }
 
+    # private
+
     def send(self, opname, schema=None):
         """ send """
         opcode = OPCODES[opname]
@@ -50,21 +53,6 @@ class Conga(Evented):
         logger.debug('[%s] %s', opname, MessageToDict(schema))
         if opname in self.handlers:
             self.handlers[opname](schema)
-
-    def set_session(self, session_id, user_id, device_id):
-        """ set_session """
-        self.builder.user_id = user_id
-        self.builder.device_id = device_id
-        self.session_id = session_id
-        self.trigger('set_session')
-
-    def login(self, email, password):
-        """ login """
-        data = schema_pb2.CMSG_USER_LOGIN()
-        data.email = email
-        data.password = password
-        data.unk1 = 1003
-        self.send('CMSG_USER_LOGIN', data)
 
     def connect_device(self):
         """ connect_device """
@@ -84,6 +72,8 @@ class Conga(Evented):
     def ping(self):
         """ ping """
         self.send('CMSG_PING')
+
+    # handlers
 
     def handle_ping(self, _):
         """ handlePing """
@@ -127,6 +117,8 @@ class Conga(Evented):
         self.device.position.phi = schema.pose.phi
         self.trigger('update')
 
+    # events
+
     def on_set_session(self):
         """ on_set_session """
         self.restore_session()
@@ -144,3 +136,44 @@ class Conga(Evented):
         """ on_update """
         logger.info('State: %s', self.device.__dict__)
         logger.info('Position: %s', self.device.position.__dict__)
+
+    # methods
+
+    def set_session(self, session_id, user_id, device_id):
+        """ set_session """
+        self.builder.user_id = user_id
+        self.builder.device_id = device_id
+        self.session_id = session_id
+        self.trigger('set_session')
+
+    def login(self, email, password):
+        """ login """
+        data = schema_pb2.CMSG_USER_LOGIN()
+        data.email = email
+        data.password = password
+        data.unk1 = 1003
+        self.send('CMSG_USER_LOGIN', data)
+
+    def locate(self):
+        """ locate """
+        self.send(OPCODES['CMSG_LOCATE_DEVICE'])
+
+    def turn_on(self):
+        """ turn_on """
+        data = schema_pb2.CMSG_CLEAN_MODE()
+        data.mode = 1
+        data.unk2 = 2
+        self.send(OPCODES['CMSG_CLEAN_MODE'], data)
+
+    def turn_off(self):
+        """ turn_off """
+        data = schema_pb2.CMSG_CLEAN_MODE()
+        data.mode = 2
+        data.unk2 = 2
+        self.send(OPCODES['CMSG_CLEAN_MODE'], data)
+
+    def return_home(self):
+        """ return_home """
+        data = schema_pb2.CMSG_RETURN_HOME()
+        data.unk1 = 1
+        self.send(OPCODES['CMSG_RETURN_HOME'], data)
