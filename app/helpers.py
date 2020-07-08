@@ -8,7 +8,7 @@ from .objects import Packet
 
 def build_schema(packet: Packet):
     """ build_schema """
-    opname = OPNAMES[packet.opcode]
+    opname = OPNAMES[packet.opcode] if packet.opcode in OPNAMES else None
     schema = None
     if opname and hasattr(schema_pb2, opname):
         schema = getattr(schema_pb2, opname)()

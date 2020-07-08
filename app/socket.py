@@ -9,10 +9,6 @@ logger = logging.getLogger(__name__)
 
 class Socket(Evented):
     """ Socket """
-    sock = None
-    host = None
-    port = None
-
     def __init__(self, host, port):
         super().__init__()
         self.host = host

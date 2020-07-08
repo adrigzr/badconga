@@ -8,7 +8,7 @@ from .evented import Evented
 from .objects import Device
 from .builder import Builder
 from .socket import Socket
-from .constants import HOST, PORT, OPCODES, OPNAMES, MODES, STATES
+from .constants import HOST, PORT, OPCODES, OPNAMES, FAN_MODES, CLEAN_MODES, STATES, FanMode, REVERSE_FAN_MODES
 from .helpers import unpack, build_schema
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ class Conga(Evented):
         packet = unpack(data)
         schema = build_schema(packet)
         opname = OPNAMES[packet.opcode] if packet.opcode in OPNAMES else packet.opcode
-        logger.debug('[%s] %s', opname, MessageToDict(schema))
+        logger.debug('[%s] %s', opname, MessageToDict(schema) if schema else packet.payload.hex())
         if opname in self.handlers:
             self.handlers[opname](schema)
 
@@ -96,7 +96,8 @@ class Conga(Evented):
     def handle_device_status(self, schema):
         """ handle_device_status """
         self.device.battery_level = schema.battery
-        self.device.fan_mode = MODES[schema.cleanPreference]
+        self.device.fan_mode = FAN_MODES[schema.cleanPreference]
+        self.device.clean_mode = CLEAN_MODES[schema.workMode]
         self.device.state = STATES[schema.workMode]
         self.trigger('update')
 
@@ -156,24 +157,30 @@ class Conga(Evented):
 
     def locate(self):
         """ locate """
-        self.send(OPCODES['CMSG_LOCATE_DEVICE'])
+        self.send('CMSG_LOCATE_DEVICE')
 
     def turn_on(self):
         """ turn_on """
         data = schema_pb2.CMSG_CLEAN_MODE()
         data.mode = 1
         data.unk2 = 2
-        self.send(OPCODES['CMSG_CLEAN_MODE'], data)
+        self.send('CMSG_CLEAN_MODE', data)
 
     def turn_off(self):
         """ turn_off """
         data = schema_pb2.CMSG_CLEAN_MODE()
         data.mode = 2
         data.unk2 = 2
-        self.send(OPCODES['CMSG_CLEAN_MODE'], data)
+        self.send('CMSG_CLEAN_MODE', data)
 
     def return_home(self):
         """ return_home """
         data = schema_pb2.CMSG_RETURN_HOME()
         data.unk1 = 1
-        self.send(OPCODES['CMSG_RETURN_HOME'], data)
+        self.send('CMSG_RETURN_HOME', data)
+
+    def set_fan_mode(self, mode: FanMode):
+        """ set_clean_mode """
+        data = schema_pb2.CMSG_SET_FAN_MODE()
+        data.mode = REVERSE_FAN_MODES[mode]
+        self.send('CMSG_SET_FAN_MODE', data)
