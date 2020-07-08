@@ -1,3 +1,7 @@
 *.pyc
 *_pb2.py
 __pycache__
+pyvenv.cfg
+venv
+.venv
+.env
