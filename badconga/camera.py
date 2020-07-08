@@ -1,4 +1,5 @@
 """ camera """
+# pylint: disable=unused-argument
 import logging
 from homeassistant.components.camera import PLATFORM_SCHEMA, Camera
 from . import DOMAIN
@@ -7,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({})
 
-async def async_setup_platform(hass, _, async_add_entities):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """ async_setup_platform """
     instance = hass.data[DOMAIN]['instance']
     async_add_entities([CongaCamera(instance)])

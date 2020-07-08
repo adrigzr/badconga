@@ -53,3 +53,10 @@ $ protoc --python_out=. app/schema.proto
 ```
 $ python3 parse.py flow/*~*.xml
 ```
+
+# Inspect hex string as protobuf
+
+```
+$ git clone https://github.com/mildsunrise/protobuf-inspector.git
+$ echo "<hex string>" | xxd -r -p | ./protobuf-inspector/main.py
+```

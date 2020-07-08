@@ -52,7 +52,8 @@ class Conga(Evented):
 
     def on_connect(self):
         """ on_connect """
-        self.restore_session()
+        if self.session_id:
+            self.restore_session()
 
     def on_recv(self, data: bytes):
         """ on_recv """
@@ -94,6 +95,8 @@ class Conga(Evented):
 
     def handle_user_login(self, schema):
         """ handle_user_login """
+        if schema.result != 0:
+            raise Exception('user login error ({})'.format(hex(schema.result)))
         self.set_session(
             session_id=schema.body.sessionId,
             user_id=schema.body.userId,
@@ -103,7 +106,7 @@ class Conga(Evented):
     def handle_session_login(self, schema):
         """ handle_session_login """
         if schema.result != 0:
-            raise Exception('session expired')
+            raise Exception('session login error ({})'.format(hex(schema.result)))
         self.trigger('login')
 
     def handle_device_status(self, schema):

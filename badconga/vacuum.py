@@ -1,4 +1,5 @@
 """ vacuum """
+# pylint: disable=unused-argument
 import logging
 import voluptuous as vol
 from homeassistant.components.vacuum import (
@@ -30,7 +31,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 MAX_BATTERY = 200
 
-def setup_platform(hass, _, add_devices):
+def setup_platform(hass, config, add_devices, discovery_info=None):
     """ setup_platform """
     instance = hass.data[DOMAIN]['instance']
     add_devices([CongaVacuum(instance)])
