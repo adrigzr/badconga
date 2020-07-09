@@ -35,10 +35,11 @@ class Conga(Evented):
             'SMSG_DEVICE_STATUS': self.handle_device_status,
             'SMSG_USER_LOGOUT': self.handle_user_logout,
             'SMSG_PING': self.handle_ping,
-            'SMSG_DISCONNECT': self.handle_disconnect,
+            'SMSG_DISCONNECT_DEVICE': self.handle_disconnect_device,
             'SMSG_UPDATE_ROBOT_POSITION': self.handle_update_robot_position,
             'SMSG_MAP_INFO': self.handle_map_update,
             'SMSG_MAP_UPDATE': self.handle_map_update,
+            'SMSG_DISCONNECT': self.handle_disconnect,
         }
 
     # private
@@ -97,11 +98,14 @@ class Conga(Evented):
         """ handle_user_login """
         if schema.result != 0:
             raise Exception('user login error ({})'.format(hex(schema.result)))
+        if schema.body.deviceId == 0:
+            raise Exception('device not configured on this account')
         self.set_session(
             session_id=schema.body.sessionId,
             user_id=schema.body.userId,
             device_id=schema.body.deviceId
         )
+        self.restore_session()
 
     def handle_session_login(self, schema):
         """ handle_session_login """
@@ -126,7 +130,7 @@ class Conga(Evented):
         logger.info('Logout: %s', schema.reason)
         self.trigger('logout')
 
-    def handle_disconnect(self, _):
+    def handle_disconnect_device(self, _):
         """ handleDisconnect """
         logger.info('Disconnected! Reconnecting...')
         self.trigger('disconnect_device')
@@ -154,6 +158,10 @@ class Conga(Evented):
         self.map.robot.y = schema.robotPoseInfo.poseY
         self.map.robot.phi = schema.robotPoseInfo.posePhi
         self.trigger('update_map')
+
+    def handle_disconnect(self, _):
+        """ handle_disconnect """
+        self.socket.disconnect()
 
     # events
 

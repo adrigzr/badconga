@@ -22,13 +22,14 @@ class Socket(Evented):
 
     def connect(self):
         """ connect """
-        logger.debug('connecting to %s:%s...', self.host, self.port)
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((self.host, self.port))
-        self.is_connected = True
-        self.thread = threading.Thread(target=self.handle)
-        self.thread.start()
-        self.trigger('connect')
+        if not self.is_connected:
+            logger.debug('connecting to %s:%s...', self.host, self.port)
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.connect((self.host, self.port))
+            self.is_connected = True
+            self.thread = threading.Thread(target=self.handle)
+            self.thread.start()
+            self.trigger('connect')
 
     def disconnect(self):
         """ disconnect """
@@ -38,12 +39,14 @@ class Socket(Evented):
                 self.sock.close()
             except socket.error:
                 pass
+        self.sock = None
         if self.thread:
             logger.debug('waiting for thread to close...')
             try:
                 self.thread.join()
             except RuntimeError:
                 pass
+        self.thread = None
         if self.is_connected:
             self.is_connected = False
             self.trigger('disconnect')

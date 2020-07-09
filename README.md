@@ -20,22 +20,37 @@ Currently only tested on: Conga 3490.
 
 <img src="./images/camera.png" width="300"/>
 
-## Snippets
+## Home Assistant
 
-### Home Assistant configuration
+### Installation
+
+Copy or link [`badconga`](./badconga) subfolder to `config/custom_components`.
+
+### Configuration
+
+Create a new account on the app and link the device to it.
+
+Currently, it does not support having the same account on the app and Home Assistant at the same time. One login will disable the other. If you use the same account as in the app, the app will be logged out.
 
 ```
 badconga:
-  sessionId: '<session id>'
-  userId: <user id>
-  deviceId: <device id>
+  email: '<email>'
+  password: '<password>'
 
 vacuum:
   - platform: badconga
 
 camera:
   - platform: badconga
+
+# enable debug for now...
+logger:
+  default: info
+  logs:
+    custom_components.badconga: debug
 ```
+
+## Snippets
 
 ### Lint project
 

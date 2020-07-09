@@ -252,7 +252,9 @@ message SMSG_USER_LOGOUT {
     required string reason = 2;
 }
 
-message SMSG_DISCONNECT {
+message SMSG_DISCONNECT {}
+
+message SMSG_DISCONNECT_DEVICE {
     required int32 result = 1;
 }
 
