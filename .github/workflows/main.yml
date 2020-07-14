@@ -27,7 +27,7 @@ jobs:
         uses: arduino/setup-protoc@master
       - name: Compile protobuf
         run: |
-          protoc --python_out=. badconga/app/schema.proto
+          protoc --python_out=. custom_components/badconga/app/schema.proto
       - name: Lint code
         run: |
-          pylint --ignore=schema_pb2.py badconga
+          pylint --ignore=schema_pb2.py custom_components/badconga
