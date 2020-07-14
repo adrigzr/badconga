@@ -19,22 +19,12 @@ from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-CONF_SESSION_ID = 'sessionId'
-CONF_USER_ID = 'userId'
-CONF_DEVICE_ID = 'deviceId'
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Optional(CONF_SESSION_ID, default=False): cv.string,
-    vol.Optional(CONF_USER_ID, default=False): cv.Number,
-    vol.Optional(CONF_DEVICE_ID, default=False): cv.Number,
-})
-
 MAX_BATTERY = 200
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
-    """ setup_platform """
-    instance = hass.data[DOMAIN]['instance']
-    add_devices([CongaVacuum(instance)])
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+    """ async_setup_platform """
+    if 'instance' in hass.data[DOMAIN]:
+        async_add_entities([CongaVacuum(hass.data[DOMAIN]['instance'])])
 
 class CongaVacuum(VacuumEntity):
     """ CongaVacuum """
