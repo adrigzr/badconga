@@ -33,7 +33,7 @@ class Conga(Evented):
             'SMSG_USER_LOGIN': self.handle_user_login,
             'SMSG_SESSION_LOGIN': self.handle_session_login,
             'SMSG_DEVICE_STATUS': self.handle_device_status,
-            'SMSG_USER_LOGOUT': self.handle_user_logout,
+            'SMSG_USER_KICK': self.handle_user_logout,
             'SMSG_PING': self.handle_ping,
             'SMSG_DISCONNECT_DEVICE': self.handle_disconnect_device,
             'SMSG_UPDATE_ROBOT_POSITION': self.handle_update_robot_position,

@@ -247,7 +247,7 @@ message SMSG_LOCATE_DEVICE {
     required int32 result = 1;
 }
 
-message SMSG_USER_LOGOUT {
+message SMSG_USER_KICK {
     required int32 result = 1;
     required string reason = 2;
 }
@@ -291,6 +291,15 @@ message CMSG_UNK_1 {
 }
 
 message SMSG_UNK_1 {
+    required int32 result = 1;
+}
+
+message CMSG_USER_LOGOUT {
+    required int32 userId = 1;
+    required string sessionId = 2;
+}
+
+message SMSG_USER_LOGOUT {
     required int32 result = 1;
 }
 
