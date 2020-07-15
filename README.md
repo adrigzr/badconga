@@ -24,18 +24,25 @@ Currently only tested on: Conga 3490.
 
 ### Installation
 
-Copy or link [`badconga`](./badconga) subfolder to `config/custom_components`.
+#### HACS
+
+- Add repository "https://github.com/adrigzr/badconga" to custom repositories and select "Integration" category.
+- Click on "Install" in the plugin card.
+
+#### Manual
+
+Copy or link [`badconga`](./custom_components/badconga) subfolder to `config/custom_components`.
 
 ### Configuration
 
 Create a new account on the app and link the device to it.
 
-Currently, it does not support having the same account on the app and Home Assistant at the same time. One login will disable the other. If you use the same account as in the app, the app will be logged out.
+Currently, it does not support having the same account on the app and on Home Assistant at the same time. One login will disable the other. If you use the same account as in the app, the app will be logged out.
 
 ```
 badconga:
-  email: '<email>'
-  password: '<password>'
+  email: 'email'
+  password: 'password'
 
 vacuum:
   - platform: badconga
