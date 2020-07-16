@@ -3,6 +3,7 @@
 import logging
 from homeassistant.components.camera import PLATFORM_SCHEMA, Camera
 from . import DOMAIN
+from .app.conga import Conga
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,15 +16,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 class CongaCamera(Camera):
     """ CongaCamera """
-    def __init__(self, instance):
+    def __init__(self, instance: Conga):
         super().__init__()
         self.content_type = 'image/png'
         self.instance = instance
-        self.instance.on('update_map', self.schedule_update_ha_state)
+        self.instance.client.on('update_map', self.schedule_update_ha_state)
 
     @property
     def name(self):
         return 'Conga'
 
     def camera_image(self):
-        return self.instance.map.image
+        return self.instance.client.map.image

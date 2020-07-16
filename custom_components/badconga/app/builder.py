@@ -1,7 +1,7 @@
 """ builder """
 # pylint: disable=too-few-public-methods
 import logging
-from .constants import CTYPE
+from .const import CTYPE
 from .entities import Packet
 from .helpers import pack
 

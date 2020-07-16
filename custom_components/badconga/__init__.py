@@ -3,43 +3,28 @@ import logging
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 from .app.conga import Conga
+from .const import DOMAIN, CONF_EMAIL, CONF_PASSWORD
 
-DOMAIN = 'badconga'
-CONF_SESSION_ID = 'sessionId'
-CONF_USER_ID = 'userId'
-CONF_DEVICE_ID = 'deviceId'
-CONF_EMAIL = 'email'
-CONF_PASSWORD = 'password'
+VERSION = '0.0.0-development'
 
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.All(
-            {
-                vol.Required(CONF_EMAIL, default=""): cv.string,
-                vol.Required(CONF_PASSWORD, default=""): cv.string,
-            },
-            {
-                vol.Required(CONF_SESSION_ID, default=""): cv.string,
-                vol.Required(CONF_USER_ID, default=""): cv.string,
-                vol.Optional(CONF_DEVICE_ID, default="us"): cv.string,
-            }
-        )
-    },
-    extra=vol.ALLOW_EXTRA,
-)
+CONFIG_SCHEMA = vol.Schema({
+    DOMAIN: vol.Schema({
+        vol.Required(CONF_EMAIL, default=""): cv.string,
+        vol.Required(CONF_PASSWORD, default=""): cv.string,
+    })
+}, extra=vol.ALLOW_EXTRA)
 
 async def async_setup(hass, config):
     """ async_setup """
-    conf = config.get(DOMAIN)
-    if conf is not None:
-        instance = Conga()
-        if CONF_EMAIL in conf and CONF_PASSWORD in conf:
-            instance.login(conf[CONF_EMAIL], conf[CONF_PASSWORD])
-        elif CONF_SESSION_ID in conf and CONF_USER_ID in conf and CONF_DEVICE_ID in conf:
-            instance.set_session(conf[CONF_SESSION_ID], conf[CONF_USER_ID], conf[CONF_DEVICE_ID])
-        else:
-            logging.error('Missing configuration')
+    if DOMAIN not in config:
+        return True
+    data = dict(config.get(DOMAIN))
+    if CONF_EMAIL in data and CONF_PASSWORD in data:
+        instance = Conga(data[CONF_EMAIL], data[CONF_PASSWORD])
+        instance.start()
         hass.data[DOMAIN] = {
             'instance': instance,
         }
+    else:
+        logging.error('Missing configuration')
     return True

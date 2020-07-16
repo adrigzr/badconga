@@ -1,4 +1,4 @@
-""" constants """
+""" const """
 from typing import Union
 
 OPCODES = {
@@ -19,10 +19,11 @@ OPCODES = {
     'SMSG_DEVICE_TIME': 0x1012,
     'CMSG_PING': 0x1079,
     'SMSG_PING': 0x107A,
+    'CMSG_DISCONNECT_DEVICE': 0x107B,
     'SMSG_DISCONNECT_DEVICE': 0x107C,
     'CMSG_TASK_DATA': 0x10CD,
     'SMSG_TASK_DATA': 0x10CE,
-    'CMSG_CONNECT': 0x1009,
+    'CMSG_CONNECT_DEVICE': 0x1009,
     'SMSG_DEVICE_STATUS': 0x10FE,
     'CMSG_LOCATE_DEVICE': 0X10EB,
     'SMSG_LOCATE_DEVICE': 0X10EC,

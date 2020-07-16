@@ -33,34 +33,34 @@ class Socket(Evented):
 
     def disconnect(self):
         """ disconnect """
-        logger.debug('disconnecting...')
-        if self.sock:
-            try:
-                self.sock.close()
-            except socket.error:
-                pass
-        self.sock = None
-        if self.thread:
-            logger.debug('waiting for thread to close...')
-            try:
-                self.thread.join()
-            except RuntimeError:
-                pass
-        self.thread = None
         if self.is_connected:
+            logger.debug('disconnecting...')
             self.is_connected = False
+            if self.sock:
+                logger.debug('closing socket...')
+                try:
+                    self.sock.close()
+                except socket.error:
+                    pass
+            if self.thread:
+                if self.thread != threading.current_thread():
+                    logger.debug('waiting for thread to close...')
+                    try:
+                        self.thread.join()
+                    except RuntimeError:
+                        pass
+            self.sock = None
+            self.thread = None
             self.trigger('disconnect')
 
     def send(self, data: bytes):
         """ send """
-        if not self.is_connected:
-            self.connect()
-        try:
-            self.sock.send(data)
-        except socket.error as error:
-            logger.debug('send error: %s', error)
-            self.disconnect()
-            self.send(data)
+        if self.is_connected:
+            try:
+                self.sock.send(data)
+            except socket.error as error:
+                logger.debug('send error: %s', error)
+                self.disconnect()
 
     def handle(self):
         """ handle """

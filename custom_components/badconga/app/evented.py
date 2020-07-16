@@ -1,6 +1,7 @@
 """ evented """
 # pylint: disable=invalid-name
 import logging
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,6 @@ class Evented:
         if event_name in self.callbacks:
             for callback in self.callbacks[event_name]:
                 if args:
-                    callback(args)
+                    threading.Thread(target=callback, args=[args]).start()
                 else:
-                    callback()
+                    threading.Thread(target=callback).start()

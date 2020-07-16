@@ -192,7 +192,7 @@ message SMSG_PING {
     required int32 result = 1;
 }
 
-message CMSG_CONNECT {}
+message CMSG_CONNECT_DEVICE {}
 
 message SMSG_DEVICE_STATUS {
     required int32 mapHeadId = 1;
@@ -253,6 +253,8 @@ message SMSG_USER_KICK {
 }
 
 message SMSG_DISCONNECT {}
+
+message CMSG_DISCONNECT_DEVICE {}
 
 message SMSG_DISCONNECT_DEVICE {
     required int32 result = 1;

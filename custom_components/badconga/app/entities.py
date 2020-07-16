@@ -1,6 +1,6 @@
 """ objects """
 # pylint: disable=invalid-name,too-many-arguments,too-few-public-methods,too-many-instance-attributes
-from .constants import (
+from .const import (
     CLEAN_MODE_AUTO,
     CLEAN_MODE_EDGES,
     CLEAN_MODE_SPIRAL,

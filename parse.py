@@ -1,9 +1,9 @@
 """ Module """
 import struct
 import sys
-from badconga.app.constants import OPNAMES
-from badconga.app.entities import Packet
-from badconga.app.helpers import build_schema, message_to_dict
+from custom_components.badconga.app.const import OPNAMES
+from custom_components.badconga.app.entities import Packet
+from custom_components.badconga.app.helpers import build_schema, message_to_dict
 
 HEADERS_LEN = 24
 IGNORED = [
@@ -25,8 +25,10 @@ def handle_packet(packet: Packet):
 def stringify(packet: Packet):
     """ stringify """
     opcode = packet.opcode
-    return '[{}] {}'.format(
+    return '[{}] [USER: {}] [DEVICE: {}] {}'.format(
         OPNAMES[opcode] if opcode in OPNAMES else hex(opcode),
+        packet.user_id,
+        packet.device_id,
         handle_packet(packet)
     )
 
