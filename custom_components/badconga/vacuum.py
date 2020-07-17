@@ -1,10 +1,13 @@
 """ vacuum """
 # pylint: disable=unused-argument
 import logging
+from functools import partial
 from homeassistant.components.vacuum import (
     VacuumEntity,
     SUPPORT_START,
     SUPPORT_STOP,
+    SUPPORT_STATE,
+    SUPPORT_STATUS,
     SUPPORT_RETURN_HOME,
     SUPPORT_FAN_SPEED,
     SUPPORT_BATTERY,
@@ -44,6 +47,12 @@ class CongaVacuum(VacuumEntity):
         return self.instance.client.device.state
 
     @property
+    def status(self):
+        if self.instance.client.device.charge_status:
+            return 'charging'
+        return self.instance.client.device.state
+
+    @property
     def state_attributes(self):
         data = super().state_attributes
         data['clean_mode'] = self.instance.client.device.clean_mode
@@ -71,25 +80,19 @@ class CongaVacuum(VacuumEntity):
     def fan_speed_list(self):
         return [FAN_MODE_NONE, FAN_MODE_ECO, FAN_MODE_NORMAL, FAN_MODE_TURBO]
 
-    def turn_on(self, **kwargs):
-        """ turn_on """
-        return self.instance.client.turn_on()
-
-    def start(self):
+    def start(self, **kwargs):
         """ start """
         return self.instance.client.turn_on()
 
-    def start_pause(self, **kwargs):
-        """ start_pause """
-        return self.instance.client.turn_on()
-
-    def turn_off(self, **kwargs):
-        """ turn_off """
-        return self.instance.client.turn_off()
+    async def async_start(self, **kwargs):
+        await self.hass.async_add_executor_job(partial(self.start, **kwargs))
 
     def stop(self, **kwargs):
         """ stop """
         return self.instance.client.turn_off()
+
+    async def async_stop(self, **kwargs):
+        await self.hass.async_add_executor_job(partial(self.stop, **kwargs))
 
     def return_to_base(self, **kwargs):
         """ return_to_base """
@@ -105,7 +108,18 @@ class CongaVacuum(VacuumEntity):
 
     @property
     def supported_features(self):
-        # SUPPORT_TURN_ON | SUPPORT_TURN_OFF | SUPPORT_PAUSE | SUPPORT_STOP | SUPPORT_CLEAN_SPOT |
-        # SUPPORT_SEND_COMMAND | SUPPORT_START  | SUPPORT_STATUS
-        return SUPPORT_START | SUPPORT_STOP | SUPPORT_RETURN_HOME | SUPPORT_FAN_SPEED | \
-            SUPPORT_BATTERY | SUPPORT_LOCATE | SUPPORT_MAP
+        return \
+            SUPPORT_STOP | \
+            SUPPORT_RETURN_HOME | \
+            SUPPORT_FAN_SPEED | \
+            SUPPORT_BATTERY | \
+            SUPPORT_STATUS | \
+            SUPPORT_LOCATE | \
+            SUPPORT_MAP | \
+            SUPPORT_STATE | \
+            SUPPORT_START
+            # SUPPORT_CLEAN_SPOT | \
+            # SUPPORT_SEND_COMMAND | \
+            # SUPPORT_TURN_ON | \
+            # SUPPORT_TURN_OFF | \
+            # SUPPORT_PAUSE | \

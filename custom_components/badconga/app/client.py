@@ -38,6 +38,7 @@ class Client(Evented):
             'SMSG_MAP_UPDATE': self.handle_map_update,
             'SMSG_DISCONNECT': self.handle_disconnect,
             'SMSG_USER_LOGOUT': self.handle_user_logout,
+            'SMSG_DEVICE_INUSE': self.handle_disconnect,
         }
 
     # private
@@ -53,7 +54,7 @@ class Client(Evented):
         """ on_recv """
         packet = unpack(data)
         schema = build_schema(packet)
-        opname = OPNAMES[packet.opcode] if packet.opcode in OPNAMES else packet.opcode
+        opname = OPNAMES[packet.opcode] if packet.opcode in OPNAMES else hex(packet.opcode)
         logger.debug('[%s] %s', opname, message_to_dict(schema) if schema else packet.payload.hex())
         if opname in self.handlers:
             self.handlers[opname](schema)
@@ -213,7 +214,6 @@ class Client(Evented):
         data = schema_pb2.CMSG_MAP_INFO()
         data.mask = 0x78FF
         self.send('CMSG_MAP_INFO', data)
-
 
     def turn_on(self):
         """ turn_on """

@@ -1,6 +1,5 @@
 """ conga """
 import logging
-import threading
 from .client import Client
 
 logger = logging.getLogger(__name__)

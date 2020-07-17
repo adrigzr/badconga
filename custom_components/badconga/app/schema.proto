@@ -305,6 +305,10 @@ message SMSG_USER_LOGOUT {
     required int32 result = 1;
 }
 
+message SMSG_DEVICE_INUSE {
+    required int32 result = 1;
+}
+
 message RobotPose {
     required int32 id = 1;
     required float x = 2;
