@@ -24,7 +24,7 @@ MAX_BATTERY = 200
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """ async_setup_platform """
-    if 'instance' in hass.data[DOMAIN]:
+    if 'instance' in hass.data[DOMAIN] and discovery_info is not None:
         async_add_entities([CongaVacuum(hass.data[DOMAIN]['instance'])])
 
 class CongaVacuum(VacuumEntity):

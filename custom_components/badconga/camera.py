@@ -11,7 +11,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({})
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """ async_setup_platform """
-    if 'instance' in hass.data[DOMAIN]:
+    if 'instance' in hass.data[DOMAIN] and discovery_info is not None:
         async_add_entities([CongaCamera(hass.data[DOMAIN]['instance'])])
 
 class CongaCamera(Camera):

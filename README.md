@@ -44,12 +44,6 @@ badconga:
   email: 'email'
   password: 'password'
 
-vacuum:
-  - platform: badconga
-
-camera:
-  - platform: badconga
-
 # enable debug for now...
 logger:
   default: info
