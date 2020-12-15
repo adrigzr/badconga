@@ -2,7 +2,7 @@
 # pylint: disable=unused-argument
 import logging
 from functools import partial
-from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers import entity_platform
 from homeassistant.components.vacuum import (
     VacuumEntity,
     SUPPORT_START,
@@ -18,8 +18,6 @@ from homeassistant.components.vacuum import (
 from .app.const import FAN_MODE_NONE, FAN_MODE_ECO, FAN_MODE_NORMAL, FAN_MODE_TURBO
 from .app.conga import Conga
 from . import DOMAIN
-
-import voluptuous as vol
 
 _LOGGER = logging.getLogger(__name__)
 
