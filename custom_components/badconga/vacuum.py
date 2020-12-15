@@ -2,6 +2,7 @@
 # pylint: disable=unused-argument
 import logging
 from functools import partial
+from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.components.vacuum import (
     VacuumEntity,
     SUPPORT_START,
@@ -18,7 +19,14 @@ from .app.const import FAN_MODE_NONE, FAN_MODE_ECO, FAN_MODE_NORMAL, FAN_MODE_TU
 from .app.conga import Conga
 from . import DOMAIN
 
+import voluptuous as vol
+
 _LOGGER = logging.getLogger(__name__)
+
+SERVICE_START = "start"
+SERVICE_STOP = "stop"
+SERVICE_RETURN_HOME = "return_to_base"
+SERVICE_LOCATE = "locate"
 
 MAX_BATTERY = 200
 
@@ -26,6 +34,24 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     """ async_setup_platform """
     if 'instance' in hass.data[DOMAIN] and discovery_info is not None:
         async_add_entities([CongaVacuum(hass.data[DOMAIN]['instance'])])
+
+        platform = entity_platform.current_platform.get()
+        
+        platform.async_register_entity_service(
+            SERVICE_START, {}, "async_start",
+        )
+        
+        platform.async_register_entity_service(
+            SERVICE_STOP, {}, "async_stop",
+        )
+        
+        platform.async_register_entity_service(
+            SERVICE_RETURN_HOME, {}, "return_to_base",
+        )
+        
+        platform.async_register_entity_service(
+            SERVICE_LOCATE, {}, "locate",
+        )
 
 class CongaVacuum(VacuumEntity):
     """ CongaVacuum """
