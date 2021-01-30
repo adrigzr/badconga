@@ -48,6 +48,12 @@ class Device:
         self.type = 0
         self.fault_code = None
         self.fan_mode: FanMode = FAN_MODE_UNKNOWN
+        self.serial_number = None
+        self.utc_registered = None
+        self.alias = None
+        self.model = None
+        self.firmware_version = None
+        self.controller_version = None
 
     @property
     def state(self) -> State:
