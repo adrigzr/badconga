@@ -14,7 +14,7 @@ from homeassistant.components.vacuum import (
     SUPPORT_LOCATE,
     SUPPORT_MAP
 )
-from .app.const import FAN_MODE_NONE, FAN_MODE_ECO, FAN_MODE_NORMAL, FAN_MODE_TURBO
+from .app.const import FAN_MODE_NONE, FAN_MODE_ECO, FAN_MODE_NORMAL, FAN_MODE_TURBO, ModelName
 from .app.conga import Conga
 from . import DOMAIN
 
@@ -64,6 +64,14 @@ class CongaVacuum(VacuumEntity):
         data['charger_phi'] = self.instance.client.map.charger.phi
         data['clean_time'] = self.instance.client.device.clean_time
         data['clean_size'] = self.instance.client.device.clean_size
+        data['name'] = self.instance.client.device.alias
+        data['model'] = ModelName[self.instance.client.device.model] if (
+            self.instance.client.device.model in ModelName) else (
+            self.instance.client.device.model)
+        data['serial'] = self.instance.client.device.serial_number
+        data['revision'] = self.instance.client.device.controller_version
+        data['firmware'] = self.instance.client.device.firmware_version
+        data['registered'] = self.instance.client.device.utc_registered
         return data
 
     @property

@@ -2,6 +2,7 @@
 # pylint: disable=too-many-public-methods
 import logging
 import threading
+import datetime
 from . import schema_pb2
 from .evented import Evented
 from .entities import Device
@@ -30,6 +31,7 @@ class Client(Evented):
             'SMSG_USER_LOGIN': self.handle_user_login,
             'SMSG_SESSION_LOGIN': self.handle_session_login,
             'SMSG_DEVICE_STATUS': self.handle_device_status,
+            'SMSG_DEVICE_LIST': self.handle_device_list,
             'SMSG_USER_KICK': self.handle_user_kick,
             'SMSG_PING': self.handle_ping,
             'SMSG_DISCONNECT_DEVICE': self.handle_disconnect_device,
@@ -108,6 +110,20 @@ class Client(Evented):
         self.device.fan_mode = FAN_MODES[schema.cleanPreference]
         self.trigger('update_device')
 
+    def handle_device_list(self, schema):
+        """ handle_device_list """
+        if schema.result != 0:
+            raise Exception('device list error ({})'.format(hex(schema.result)))
+        if schema.body.deviceList.deviceId == 0:
+            raise Exception('device not configured on this account')
+        self.device.serial_number = schema.body.deviceList.serialNumber
+        self.device.utc_registered = datetime.datetime.fromtimestamp(
+                schema.body.deviceList.ctime, tz=datetime.timezone.utc)
+        self.device.alias = schema.body.deviceList.alias
+        self.device.firmware_version = schema.body.deviceList.version
+        self.device.controller_version = schema.body.deviceList.ctrlVersion
+        self.device.model = schema.body.deviceList.deviceType
+
     def handle_user_kick(self, schema):
         """ handle_user_kick """
         logger.info('Logout: %s', schema.reason)
@@ -155,6 +171,7 @@ class Client(Evented):
 
     def on_login(self):
         """ on_login """
+        self.get_device_list()
         self.get_map_info()
         self.ping()
 
@@ -214,6 +231,14 @@ class Client(Evented):
         data = schema_pb2.CMSG_MAP_INFO()
         data.mask = 0x78FF
         self.send('CMSG_MAP_INFO', data)
+
+    def get_device_list(self):
+        """ get_device_list """
+        data = schema_pb2.CMSG_DEVICE_LIST()
+        data.userId = self.builder.user_id
+        data.sessionId = self.session_id
+        data.unk1 = False  # guessed
+        self.send('CMSG_DEVICE_LIST', data)
 
     def turn_on(self):
         """ turn_on """
