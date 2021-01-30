@@ -140,6 +140,7 @@ class Client(Evented):
         self.map.robot.x = schema.pose.x
         self.map.robot.y = schema.pose.y
         self.map.robot.phi = schema.pose.phi
+        self.map.invalidate()
         self.trigger('update_position')
 
     def handle_map_update(self, schema):
@@ -157,6 +158,7 @@ class Client(Evented):
         self.map.robot.x = schema.robotPoseInfo.poseX
         self.map.robot.y = schema.robotPoseInfo.poseY
         self.map.robot.phi = schema.robotPoseInfo.posePhi
+        self.map.invalidate()
         self.trigger('update_map')
 
     def handle_disconnect(self, _):

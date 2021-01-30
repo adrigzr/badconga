@@ -75,6 +75,7 @@ class Map:
         self.max_y = 0
         self.charger = Position()
         self.robot = Position()
+        self.cache = None
 
     def get_position(self, pos):
         """ get_position """
@@ -92,11 +93,18 @@ class Map:
                      fill=pixel_robot, outline=pixel_robot, width=1)
         return map_image
 
+    def invalidate(self):
+        """ invalidate cache """
+        self.cache = None
+
     @property
     def image(self):
         """ image """
         if not self.grid:
             return None
+        cached = self.cache
+        if cached is not None:
+            return cached
         img = Image.frombytes('L', (self.size_x, self.size_y), self.grid)
         img = self.draw_elements(img)
         img = crop_map(img)
@@ -104,4 +112,6 @@ class Map:
         img = img.transpose(Image.FLIP_TOP_BOTTOM)
         buffer = BytesIO()
         img.save(buffer, format='PNG')
-        return buffer.getvalue()
+        image = buffer.getvalue()
+        self.cache = image
+        return image
