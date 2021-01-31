@@ -33,9 +33,9 @@ class Packet:
 class Position:
     """ Position """
     def __init__(self):
-        self.x = 0.0
-        self.y = 0.0
-        self.phi = 0.0
+        self.x = None
+        self.y = None
+        self.phi = None
 
 class Device:
     """ Device """

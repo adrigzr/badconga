@@ -87,10 +87,16 @@ class Map:
     def draw_elements(self, map_image):
         """ draw_elements """
         draw = ImageDraw.ImageDraw(map_image)
-        draw.ellipse(calc_ellipse(self.get_position((self.charger.x, self.charger.y)), 3),
-                     fill=pixel_charger, outline=pixel_charger, width=1)
-        draw.ellipse(calc_ellipse(self.get_position((self.robot.x, self.robot.y)), 3),
-                     fill=pixel_robot, outline=pixel_robot, width=1)
+        if (self.charger.x is not None and
+                self.charger.y is not None and
+                self.charger.phi is not None):
+            draw.ellipse(calc_ellipse(self.get_position((self.charger.x, self.charger.y)), 3),
+                         fill=pixel_charger, outline=pixel_charger, width=1)
+        if (self.robot.x is not None and
+                self.robot.y is not None and
+                self.robot.phi is not None):
+            draw.ellipse(calc_ellipse(self.get_position((self.robot.x, self.robot.y)), 3),
+                         fill=pixel_robot, outline=pixel_robot, width=1)
         return map_image
 
     def invalidate(self):
