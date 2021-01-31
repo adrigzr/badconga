@@ -9,12 +9,13 @@ class Conga():
     """ Conga """
 
     # pylint: disable=too-many-instance-attributes
-    # Eight is ok but maybe put is_* into a State class object
+    # maybe put is_* into a State class object
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, animate):
         super().__init__()
         self.email = email
         self.password = password
+        self.animate = animate
         self.is_running = False
         self.is_logged = False
         self.is_device_connected = False
@@ -78,6 +79,7 @@ class Conga():
     def on_connect_device(self):
         """ on_connect_device """
         self.is_device_connected = True
+        self.client.map.animate = self.animate
         self.loop()
 
     def on_disconnect_device(self):
