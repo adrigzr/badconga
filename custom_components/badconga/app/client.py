@@ -40,7 +40,7 @@ class Client(Evented):
             'SMSG_MAP_UPDATE': self.handle_map_update,
             'SMSG_DISCONNECT': self.handle_disconnect,
             'SMSG_USER_LOGOUT': self.handle_user_logout,
-            'SMSG_DEVICE_INUSE': self.handle_disconnect,
+            'SMSG_DEVICE_INUSE': self.handle_device_inuse,
         }
 
     # private
@@ -69,6 +69,7 @@ class Client(Evented):
         self.session_id = None
         self.builder = Builder()
         self.device = Device()
+        self.map = Map()
         self.trigger('update_device')
         self.trigger('logout')
 
@@ -164,6 +165,11 @@ class Client(Evented):
     def handle_disconnect(self, _):
         """ handle_disconnect """
         self.socket.disconnect()
+
+    def handle_device_inuse(self, _):
+        """ handle_device_inuse """
+        self.trigger('device_inuse')
+        self.logout()
 
     def handle_user_logout(self, _):
         """ handle_user_logout """
