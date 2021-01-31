@@ -1,5 +1,6 @@
 """ objects """
 # pylint: disable=invalid-name,too-many-arguments,too-few-public-methods,too-many-instance-attributes
+from numbers import Number
 from .const import (
     CLEAN_MODE_AUTO,
     CLEAN_MODE_EDGES,
@@ -33,9 +34,15 @@ class Packet:
 class Position:
     """ Position """
     def __init__(self):
-        self.x = 0.0
-        self.y = 0.0
-        self.phi = 0.0
+        self.x = None
+        self.y = None
+        self.phi = None
+
+    def isvalid(self):
+        """ True if x, y and phi are valid numbers """
+        return (isinstance(self.x, Number) and
+                isinstance(self.y, Number) and
+                isinstance(self.phi, Number))
 
 class Device:
     """ Device """
