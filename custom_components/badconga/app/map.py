@@ -1,5 +1,6 @@
 """ map """
 # pylint: disable=invalid-name,too-many-instance-attributes
+import math
 from io import BytesIO
 from PIL import Image, ImageDraw
 from .entities import Position
@@ -22,10 +23,19 @@ pixel_charger = 5
 pixel_robot = 6
 pixel_wall = 255
 
+# animation steps
+steps = (22, 33, 44, 33, 22, 11)
+
 def calc_ellipse(pos, radius):
     """ calc_ellipse """
     (pos_x, pos_y) = pos
     return [(pos_x - radius, pos_y - radius), (pos_x + radius, pos_y + radius)]
+
+def calc_segment(center, aperture, rotate=0):
+    """ calculate start and end degrees of a circle segment pointing
+        at center and opening aperture degrees both ways """
+    center += rotate
+    return (center + aperture, center - aperture)
 
 def colorize_map(map_image):
     """ colorize_map """
@@ -76,6 +86,8 @@ class Map:
         self.charger = Position()
         self.robot = Position()
         self.cache = None
+        self.animate = False
+        self.frame = 0
 
     def get_position(self, pos):
         """ get_position """
@@ -88,15 +100,30 @@ class Map:
         """ draw_elements """
         draw = ImageDraw.ImageDraw(map_image)
         if self.charger.isvalid():
-            draw.ellipse(calc_ellipse(self.get_position((self.charger.x, self.charger.y)), 3),
-                         fill=pixel_charger, outline=pixel_charger, width=1)
+            pos = self.get_position((self.charger.x, self.charger.y))
+            aperture = 66
+            start, end = calc_segment(math.degrees(self.charger.phi),
+                                      aperture, rotate=180)
+            draw.pieslice(calc_ellipse(pos, 3),
+                          start, end,
+                          fill=pixel_charger, outline=pixel_charger, width=1)
         if self.robot.isvalid():
-            draw.ellipse(calc_ellipse(self.get_position((self.robot.x, self.robot.y)), 3),
-                         fill=pixel_robot, outline=pixel_robot, width=1)
+            pos = self.get_position((self.robot.x, self.robot.y))
+            if self.robot.phi == 0.0:
+                aperture = 0.1
+            else:
+                step = self.frame % len(steps) if self.animate else 0
+                aperture = steps[step]
+            start, end = calc_segment(math.degrees(self.robot.phi),
+                                      aperture)
+            draw.pieslice(calc_ellipse(pos, 3),
+                          start, end,
+                          fill=pixel_robot, outline=pixel_robot, width=1)
         return map_image
 
     def invalidate(self):
         """ invalidate cache """
+        self.frame += 1
         self.cache = None
 
     @property
