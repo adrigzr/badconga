@@ -40,7 +40,7 @@ class Conga():
                 self.reschedule()
                 return None
             if not self.is_logged:
-                return self.client.login(self.email, self.password)
+                return self.client.connect(self.email, self.password)
             if not self.is_device_connected:
                 return self.client.connect_device()
         if not self.is_running:
@@ -94,7 +94,7 @@ class Conga():
     # methods
 
     def start(self):
-        """ login """
+        """ start """
         self.is_running = True
         self.loop()
 

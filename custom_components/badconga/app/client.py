@@ -16,14 +16,20 @@ logger = logging.getLogger(__name__)
 
 class Client(Evented):
     """ Client """
+
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self):
         super().__init__()
+        self.email = None
+        self.password = None
         self.session_id = None
         self.timer = None
         self.device = Device()
         self.builder = Builder()
         self.map = Map()
         self.socket = Socket(HOST, PORT)
+        self.socket.on('connect', self.on_connect)
         self.socket.on('recv', self.on_recv)
         self.socket.on('disconnect', self.on_disconnect)
         self.on('login', self.on_login)
@@ -219,12 +225,17 @@ class Client(Evented):
         self.builder.device_id = device_id
         self.session_id = session_id
 
-    def login(self, email, password):
-        """ login """
-        self.socket.connect()
+    def connect(self, email, password):
+        """ connect """
+        self.email = email
+        self.password = password
+        self.socket.start_connect()
+
+    def on_connect(self):
+        """ on_connect """
         data = schema_pb2.CMSG_USER_LOGIN()
-        data.email = email
-        data.password = password
+        data.email = self.email
+        data.password = self.password
         data.unk1 = 1003
         self.send('CMSG_USER_LOGIN', data)
 
