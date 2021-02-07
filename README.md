@@ -2,13 +2,19 @@
 
 ![CI](https://github.com/adrigzr/badconga/workflows/CI/badge.svg)
 
-Work in progress plugin for Home Assistant for Cecotec Conga Vacuums.
+Proof of concept plugin for Home Assistant for Cecotec Conga Vacuums.
+
+Development has stopped in favor of [Valetudo](https://valetudo.cloud/) ([fork](https://github.com/adrigzr/Valetudo)).
+
+Please report the "model" state attribute of vacuum.conga along with the Conga model if it is a simple number instead of a model name.
 
 All data has been reverse-engineered from Android app [Conga 3000](https://play.google.com/store/apps/details?id=es.cecotec.s3590&hl=es).
 
-Compatible models: Conga 3290, 3390, 3490, 3590, 3690 and 3790.
+Compatible models: Conga 3290, 3390, 3490, 3590, 3690, 3790 and 5090.
 
-Currently only tested on: Conga 3490.
+Currently tested on: Conga 3490 and 5090.
+
+Please report other compatible models.
 
 ## Features
 
@@ -37,7 +43,7 @@ Copy or link [`badconga`](./custom_components/badconga) subfolder to `config/cus
 
 Create a new account on the app and link the device to it.
 
-Currently, it does not support having the same account on the app and on Home Assistant at the same time. One login will disable the other. If you use the same account as in the app, the app will be logged out.
+This integration does not support having the same account in the app and in Home Assistant at the same time. If you try to use the same account as in the app, things will not work correctly as soon as you open the app. Using different accounts in Home Assistant and in the app is supported. Home Assistant will pause controlling the robot and show its state as unknown while the app is in use. Home assistant will resume controlling the robot a few minutes after the app is closed.
 
 ```
 badconga:
