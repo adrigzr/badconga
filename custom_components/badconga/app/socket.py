@@ -25,6 +25,7 @@ class Socket(Evented):
         if not self.is_connected:
             logger.debug('connecting to %s:%s...', self.host, self.port)
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(90.0)
             self.sock.connect((self.host, self.port))
             self.is_connected = True
             self.thread = threading.Thread(target=self.handle)
@@ -67,7 +68,8 @@ class Socket(Evented):
         while self.is_connected:
             try:
                 data = self.recv()
-                self.trigger('recv', data)
+                if data:
+                    self.trigger('recv', data)
             except socket.error as error:
                 logger.debug('recv error: %s', error)
                 self.disconnect()
@@ -77,12 +79,20 @@ class Socket(Evented):
         data = b''
         # packet length
         while 4 - len(data) > 0:
-            data += self.sock.recv(4 - len(data))
+            buf = self.sock.recv(4 - len(data))
+            if not buf:
+                raise socket.error('connection closed while receiving header')
+            data += buf
         (len_response,) = struct.unpack('i', data)
         if len_response < 4:
-            raise Exception('received wrong packet: length too small', len_response)
+            logger.error('received wrong packet: length %d too small',
+                         len_response)
+            return None
         # packet data
         while len_response - len(data) > 0:
-            data += self.sock.recv(len_response - len(data))
+            buf = self.sock.recv(len_response - len(data))
+            if not buf:
+                raise socket.error('connection closed while receiving payload')
+            data += buf
         # return
         return data

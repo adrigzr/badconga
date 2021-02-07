@@ -63,8 +63,9 @@ class Client(Evented):
 
     def on_disconnect(self):
         """ on_disconnect """
-        if self.timer:
-            self.timer.cancel()
+        timer = self.timer
+        if timer:
+            timer.cancel()
             self.timer = None
         self.session_id = None
         self.builder = Builder()
@@ -77,8 +78,12 @@ class Client(Evented):
 
     def handle_ping(self, _):
         """ handlePing """
-        self.timer = threading.Timer(10.0, self.ping)
-        self.timer.start()
+        timer = self.timer
+        if timer:
+            timer.cancel()
+        timer = threading.Timer(30.0, self.ping)
+        timer.start()
+        self.timer = timer
 
     def handle_user_login(self, schema):
         """ handle_user_login """
