@@ -21,6 +21,7 @@ class CongaCamera(Camera):
         self.content_type = 'image/png'
         self.instance = instance
         self.instance.client.on('update_map', self.schedule_update_ha_state)
+        self.instance.client.on('update_position', self.schedule_update_ha_state)
 
     @property
     def name(self):

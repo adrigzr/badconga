@@ -124,3 +124,9 @@ State = Union[
     STATE_IDLE,
     STATE_UNKNOWN
 ]
+
+MODEL_TYPE_CONGA_5090 = 23
+
+MODEL_NAME = {
+    MODEL_TYPE_CONGA_5090: 'Conga 5090'
+}
