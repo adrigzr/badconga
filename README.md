@@ -2,9 +2,15 @@
 
 ![CI](https://github.com/adrigzr/badconga/workflows/CI/badge.svg)
 
-Proof of concept plugin for Home Assistant for Cecotec Conga Vacuums.
-
 Development has stopped in favor of [Valetudo](https://valetudo.cloud/) ([fork](https://github.com/adrigzr/Valetudo)).
+
+Follow this [tutorial](https://gitlab.com/freeconga/stuff/-/blob/master/docs/install-valetudo.md) to install Valetudo with our fork.
+
+Contact us at [Telegram](https://telegram.me/freeconga) | [GitLab Group](https://gitlab.com/freeconga).
+
+---
+
+Proof of concept plugin for Home Assistant for Cecotec Conga Vacuums.
 
 Please report the "model" state attribute of vacuum.conga along with the Conga model if it is a simple number instead of a model name.
 

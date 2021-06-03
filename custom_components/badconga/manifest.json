@@ -1,9 +1,11 @@
 {
     "domain": "badconga",
     "name": "Bad Conga",
+    "manifest_version": 2,
+    "version": "0.1.1",
     "documentation": "https://github.com/adrigzr/badconga",
     "issue_tracker": "https://github.com/adrigzr/badconga/issues",
-    "dependencies": [],
+    "dependencies": {},
     "codeowners": [
       "@adrigzr"
     ],
