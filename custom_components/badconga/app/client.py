@@ -172,9 +172,14 @@ class Client(Evented):
         self.map.charger.x = schema.robotChargeInfo.poseX
         self.map.charger.y = schema.robotChargeInfo.poseY
         self.map.charger.phi = schema.robotChargeInfo.posePhi
-        self.map.robot.x = schema.robotPoseInfo.poseX
-        self.map.robot.y = schema.robotPoseInfo.poseY
-        self.map.robot.phi = schema.robotPoseInfo.posePhi
+        if schema.statusInfo.workingMode not in (
+                1,   # cleaning
+        ):
+            # only apply the position if the robot is docked.
+            # here, it is not updated while cleaning.
+            self.map.robot.x = schema.robotPoseInfo.poseX
+            self.map.robot.y = schema.robotPoseInfo.poseY
+            self.map.robot.phi = schema.robotPoseInfo.posePhi
         self.map.invalidate()
         self.trigger('update_map')
 
