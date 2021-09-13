@@ -38,6 +38,7 @@ class Client(Evented):
             'SMSG_SESSION_LOGIN': self.handle_session_login,
             'SMSG_DEVICE_STATUS': self.handle_device_status,
             'SMSG_DEVICE_LIST': self.handle_device_list,
+            'SMSG_DEVICE_BUSY': self.handle_device_busy,
             'SMSG_USER_KICK': self.handle_user_kick,
             'SMSG_PING': self.handle_ping,
             'SMSG_DISCONNECT_DEVICE': self.handle_disconnect_device,
@@ -135,6 +136,10 @@ class Client(Evented):
         self.device.firmware_version = schema.body.deviceList.version
         self.device.controller_version = schema.body.deviceList.ctrlVersion
         self.device.model = schema.body.deviceList.deviceType
+
+    def handle_device_busy(self, schema):
+        """ handle_device_busy """
+        self.device.attention_request_code = schema.result
 
     def handle_user_kick(self, schema):
         """ handle_user_kick """

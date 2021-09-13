@@ -63,6 +63,9 @@ class CongaVacuum(VacuumEntity):
     def state_attributes(self):
         data = super().state_attributes
         data['clean_mode'] = self.instance.client.device.clean_mode
+        data['attention_request_code'] = self.instance.client.device.attention_request_code
+        data['fault_type'] = self.instance.client.device.type
+        data['fault_code'] = self.instance.client.device.fault_code
         data['robot_x'] = self.instance.client.map.robot.x
         data['robot_y'] = self.instance.client.map.robot.y
         data['robot_phi'] = self.instance.client.map.robot.phi
