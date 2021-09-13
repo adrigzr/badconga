@@ -25,6 +25,7 @@ class Client(Evented):
         self.password = None
         self.session_id = None
         self.timer = None
+        self.pongs = -1
         self.device = Device()
         self.builder = Builder()
         self.map = Map()
@@ -85,12 +86,11 @@ class Client(Evented):
 
     def handle_ping(self, _):
         """ handlePing """
-        timer = self.timer
-        if timer:
-            timer.cancel()
-        timer = threading.Timer(30.0, self.ping)
-        timer.start()
-        self.timer = timer
+        self.pongs += 1
+
+        # request the map only after the device reponded to a ping
+        if not self.map.robot.isvalid():
+            self.get_map_info()
 
     def handle_user_login(self, schema):
         """ handle_user_login """
@@ -113,6 +113,7 @@ class Client(Evented):
 
     def handle_device_status(self, schema):
         """ handle_device_status """
+        self.pongs += 1  # count status message as ping reply, too
         self.device.battery_level = schema.battery
         self.device.work_mode = schema.workMode
         self.device.charge_status = schema.chargeStatus
@@ -201,8 +202,7 @@ class Client(Evented):
     def on_login(self):
         """ on_login """
         self.get_device_list()
-        self.get_map_info()
-        self.ping()
+        self.ping(first=True)
 
     # methods
 
@@ -225,9 +225,22 @@ class Client(Evented):
         """ disconnect_device """
         self.send('CMSG_DISCONNECT_DEVICE')
 
-    def ping(self):
+    def ping(self, first=False):
         """ ping """
+        if self.pongs < 1 and not first:
+            logger.debug('no response to ping, reconnecting')
+            self.socket.disconnect()
+            return
+
+        self.pongs = 0
         self.send('CMSG_PING')
+
+        timer = self.timer
+        if timer:
+            timer.cancel()
+        timer = threading.Timer(30.0, self.ping)
+        timer.start()
+        self.timer = timer
 
     def set_session(self, session_id, user_id, device_id):
         """ set_session """
