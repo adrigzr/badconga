@@ -109,16 +109,20 @@ class Map:
                           fill=pixel_charger, outline=pixel_charger, width=1)
         if self.robot.isvalid():
             pos = self.get_position((self.robot.x, self.robot.y))
-            if self.robot.phi == 0.0:
-                aperture = 0.1
+            if self.robot.phi == 0.0 or not self.animate:
+                # most of the times the heading is wrong if it is 0.0
+                draw.ellipse(calc_ellipse(self.get_position((self.robot.x,
+                                                             self.robot.y)),
+                                          3),
+                             fill=pixel_robot, outline=pixel_robot, width=1)
             else:
-                step = self.frame % len(steps) if self.animate else 0
+                step = self.frame % len(steps)
                 aperture = steps[step]
-            start, end = calc_segment(math.degrees(self.robot.phi),
-                                      aperture)
-            draw.pieslice(calc_ellipse(pos, 3),
-                          start, end,
-                          fill=pixel_robot, outline=pixel_robot, width=1)
+                start, end = calc_segment(math.degrees(self.robot.phi),
+                                          aperture)
+                draw.pieslice(calc_ellipse(pos, 3),
+                              start, end,
+                              fill=pixel_robot, outline=pixel_robot, width=1)
         return map_image
 
     def invalidate(self):
