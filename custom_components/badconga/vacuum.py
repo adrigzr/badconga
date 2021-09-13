@@ -43,6 +43,13 @@ class CongaVacuum(VacuumEntity):
         return 'Conga'
 
     @property
+    def unique_id(self):
+        serial = self.instance.client.device.serial_number
+        if serial is None:
+            return None
+        return f"{serial}-vacuum"
+
+    @property
     def state(self):
         return self.instance.client.device.state
 
