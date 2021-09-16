@@ -140,7 +140,7 @@ class Client(Evented):
 
     def handle_device_busy(self, schema):
         """ handle_device_busy """
-        self.device.attention_request_code = schema.result
+        self.device.busy_result = schema.result
 
     def handle_user_kick(self, schema):
         """ handle_user_kick """

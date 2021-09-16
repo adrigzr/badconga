@@ -2,6 +2,7 @@
 # pylint: disable=unused-argument
 import logging
 from functools import partial
+
 from homeassistant.components.vacuum import (
     VacuumEntity,
     SUPPORT_START,
@@ -14,7 +15,17 @@ from homeassistant.components.vacuum import (
     SUPPORT_LOCATE,
     SUPPORT_MAP
 )
-from .app.const import FAN_MODE_NONE, FAN_MODE_ECO, FAN_MODE_NORMAL, FAN_MODE_TURBO, MODEL_NAME
+
+from .app.const import (
+    FAN_MODE_NONE,
+    FAN_MODE_ECO,
+    FAN_MODE_NORMAL,
+    FAN_MODE_TURBO,
+    MODEL_NAME,
+    STATUS_CODES,
+    BUSY_CODES
+)
+
 from .app.conga import Conga
 from . import DOMAIN
 
@@ -47,7 +58,7 @@ class CongaVacuum(VacuumEntity):
         serial = self.instance.client.device.serial_number
         if serial is None:
             return None
-        return f"{serial}-vacuum"
+        return f'{serial}-vacuum'
 
     @property
     def state(self):
@@ -61,11 +72,26 @@ class CongaVacuum(VacuumEntity):
 
     @property
     def state_attributes(self):
+        extended_status = None
+        ftype = self.instance.client.device.type
+        fcode = self.instance.client.device.fault_code
+        if ftype and fcode:
+            extended_status = (
+                STATUS_CODES[fcode] if fcode in STATUS_CODES
+                else f'unknown ({fcode})'
+            )
+
+        message = False
+        code = self.instance.client.device.busy_result
+        if code:
+            message = (
+                BUSY_CODES[code] if code in BUSY_CODES else f'unknown ({code})'
+            )
+
         data = super().state_attributes
         data['clean_mode'] = self.instance.client.device.clean_mode
-        data['attention_request_code'] = self.instance.client.device.attention_request_code
-        data['fault_type'] = self.instance.client.device.type
-        data['fault_code'] = self.instance.client.device.fault_code
+        data['extended_status'] = extended_status
+        data['message'] = message
         data['robot_x'] = self.instance.client.map.robot.x
         data['robot_y'] = self.instance.client.map.robot.y
         data['robot_phi'] = self.instance.client.map.robot.phi

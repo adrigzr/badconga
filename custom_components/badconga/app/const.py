@@ -130,3 +130,23 @@ MODEL_TYPE_CONGA_5090 = 23
 MODEL_NAME = {
     MODEL_TYPE_CONGA_5090: 'Conga 5090'
 }
+
+STATUS_TYPES = {
+    1: "Error",
+    2: "Attention",
+    3: "Information",
+}
+
+STATUS_CODES = {
+    501:  "Wheels stuck or suspended",
+    2102: "Cleaning finished, returning to dock",
+    2103: "Charging",
+    2104: "Cleaning aborted, returning to dock",
+    2105: "Fully charged",
+    #2108: "unknown",
+    2110: "Orienting",
+}
+
+BUSY_CODES = {
+    2: "New map",
+}

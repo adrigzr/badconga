@@ -52,9 +52,9 @@ class Device:
         self.charge_status = False
         self.clean_time = None
         self.clean_size = None
-        self.attention_request_code = False
         self.type = 0
         self.fault_code = None
+        self.busy_result = False
         self.fan_mode: FanMode = FAN_MODE_UNKNOWN
         self.serial_number = None
         self.utc_registered = None
