@@ -95,7 +95,7 @@ class Client(Evented):
     def handle_user_login(self, schema):
         """ handle_user_login """
         if schema.result != 0:
-            raise Exception('user login error ({})'.format(hex(schema.result)))
+            raise Exception(f'user login error ({ hex(schema.result) })')
         if schema.body.deviceId == 0:
             raise Exception('device not configured on this account')
         self.set_session(
@@ -108,7 +108,7 @@ class Client(Evented):
     def handle_session_login(self, schema):
         """ handle_session_login """
         if schema.result != 0:
-            raise Exception('session login error ({})'.format(hex(schema.result)))
+            raise Exception(f'session login error ({ hex(schema.result) })')
         self.trigger('login')
 
     def handle_device_status(self, schema):
@@ -127,7 +127,7 @@ class Client(Evented):
     def handle_device_list(self, schema):
         """ handle_device_list """
         if schema.result != 0:
-            raise Exception('device list error ({})'.format(hex(schema.result)))
+            raise Exception(f'device list error ({ hex(schema.result) })')
         if schema.body.deviceList.deviceId == 0:
             raise Exception('device not configured on this account')
         self.device.serial_number = schema.body.deviceList.serialNumber

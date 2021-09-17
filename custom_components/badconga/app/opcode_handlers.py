@@ -37,7 +37,7 @@ def read_string(data):
     """ read_string """
     (str_len,) = struct.unpack('=b', data.read(1))
     if str_len:
-        (string,) = struct.unpack('{}s'.format(str_len), data.read(str_len))
+        (string,) = struct.unpack(f'{ str_len }s', data.read(str_len))
         return string.decode('utf-8')
     return ''
 
@@ -69,8 +69,8 @@ def read_area_info_list(parent, data):
         message = parent.add()
         message.CopyFrom(dict_to_message(schema_pb2.AreaInfo(), (area_id, area_type)))
         if points:
-            message.x.extend(struct.unpack('{}f'.format(points), data.read(points * 4)))
-            message.y.extend(struct.unpack('{}f'.format(points), data.read(points * 4)))
+            message.x.extend(struct.unpack(f'{ points }f', data.read(points * 4)))
+            message.y.extend(struct.unpack(f'{ points }f', data.read(points * 4)))
             data.read(points * 3 * 4) # dump values
 
 def read_clean_room_info_list(parent, data):
