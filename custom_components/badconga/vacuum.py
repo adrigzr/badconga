@@ -56,9 +56,7 @@ class CongaVacuum(VacuumEntity):
     @property
     def unique_id(self):
         serial = self.instance.client.device.serial_number
-        if serial is None:
-            return None
-        return f'{serial}-vacuum'
+        return f'{serial}-vacuum' if serial else None
 
     @property
     def state(self):
@@ -72,38 +70,32 @@ class CongaVacuum(VacuumEntity):
 
     @property
     def state_attributes(self):
-        extended_status = None
         ftype = self.instance.client.device.type
         fcode = self.instance.client.device.fault_code
-        if ftype and fcode:
-            extended_status = (
-                STATUS_CODES[fcode] if fcode in STATUS_CODES
-                else f'unknown ({fcode})'
-            )
+        extended_status = (
+            STATUS_CODES.get(fcode, fcode) if ftype and fcode else None
+        )
 
-        message = False
         code = self.instance.client.device.busy_result
-        if code:
-            message = (
-                BUSY_CODES[code] if code in BUSY_CODES else f'unknown ({code})'
-            )
+        message = BUSY_CODES.get(code, code) if code else False
+
+        size = self.instance.client.device.clean_size
+        clean_size = f'{ size / 100 } m²' if size else None
+
+        time = self.instance.client.device.clean_time
+        clean_time = f'{ time } min' if size else None
+
+        model = self.instance.client.device.model
+        model = MODEL_NAME.get(model, model)
 
         data = super().state_attributes
         data['clean_mode'] = self.instance.client.device.clean_mode
         data['extended_status'] = extended_status
         data['message'] = message
-        data['robot_x'] = self.instance.client.map.robot.x
-        data['robot_y'] = self.instance.client.map.robot.y
-        data['robot_phi'] = self.instance.client.map.robot.phi
-        data['charger_x'] = self.instance.client.map.charger.x
-        data['charger_y'] = self.instance.client.map.charger.y
-        data['charger_phi'] = self.instance.client.map.charger.phi
-        data['clean_time'] = self.instance.client.device.clean_time
-        data['clean_size'] = self.instance.client.device.clean_size
-        data['name'] = self.instance.client.device.alias
-        data['model'] = MODEL_NAME[self.instance.client.device.model] if (
-            self.instance.client.device.model in MODEL_NAME) else (
-                self.instance.client.device.model)
+        data['clean_size'] = clean_size
+        data['clean_time'] = clean_time
+        data['alias'] = self.instance.client.device.alias
+        data['model'] = model
         data['serial'] = self.instance.client.device.serial_number
         data['revision'] = self.instance.client.device.controller_version
         data['firmware'] = self.instance.client.device.firmware_version

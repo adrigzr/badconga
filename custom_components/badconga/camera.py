@@ -30,9 +30,7 @@ class CongaCamera(Camera):
     @property
     def unique_id(self):
         serial = self.instance.client.device.serial_number
-        if serial is None:
-            return None
-        return f"{serial}-camera"
+        return f"{serial}-camera" if serial else None
 
     def camera_image(self):
         return self.instance.client.map.image

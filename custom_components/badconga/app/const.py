@@ -138,12 +138,14 @@ STATUS_TYPES = {
 }
 
 STATUS_CODES = {
-    501:  "Wheels stuck or suspended",
+    501:  "Wheels suspended",
+    503:  "Dust bin not installed",
+    514:  "Vacuum stuck",
     2102: "Cleaning finished, returning to dock",
     2103: "Charging",
     2104: "Cleaning aborted, returning to dock",
     2105: "Fully charged",
-    #2108: "unknown",
+    2108: "2108",  # seen on 5090
     2110: "Orienting",
 }
 
