@@ -25,6 +25,7 @@ class Client(Evented):
         self.password = None
         self.session_id = None
         self.timer = None
+        self.pongs = -1
         self.device = Device()
         self.builder = Builder()
         self.map = Map()
@@ -38,6 +39,7 @@ class Client(Evented):
             'SMSG_SESSION_LOGIN': self.handle_session_login,
             'SMSG_DEVICE_STATUS': self.handle_device_status,
             'SMSG_DEVICE_LIST': self.handle_device_list,
+            'SMSG_DEVICE_BUSY': self.handle_device_busy,
             'SMSG_USER_KICK': self.handle_user_kick,
             'SMSG_PING': self.handle_ping,
             'SMSG_DISCONNECT_DEVICE': self.handle_disconnect_device,
@@ -84,17 +86,16 @@ class Client(Evented):
 
     def handle_ping(self, _):
         """ handlePing """
-        timer = self.timer
-        if timer:
-            timer.cancel()
-        timer = threading.Timer(30.0, self.ping)
-        timer.start()
-        self.timer = timer
+        self.pongs += 1
+
+        # request the map only after the device reponded to a ping
+        if not self.map.robot.isvalid():
+            self.get_map_info()
 
     def handle_user_login(self, schema):
         """ handle_user_login """
         if schema.result != 0:
-            raise Exception('user login error ({})'.format(hex(schema.result)))
+            raise Exception(f'user login error ({ hex(schema.result) })')
         if schema.body.deviceId == 0:
             raise Exception('device not configured on this account')
         self.set_session(
@@ -107,11 +108,12 @@ class Client(Evented):
     def handle_session_login(self, schema):
         """ handle_session_login """
         if schema.result != 0:
-            raise Exception('session login error ({})'.format(hex(schema.result)))
+            raise Exception(f'session login error ({ hex(schema.result) })')
         self.trigger('login')
 
     def handle_device_status(self, schema):
         """ handle_device_status """
+        self.pongs += 1  # count status message as ping reply, too
         self.device.battery_level = schema.battery
         self.device.work_mode = schema.workMode
         self.device.charge_status = schema.chargeStatus
@@ -125,7 +127,7 @@ class Client(Evented):
     def handle_device_list(self, schema):
         """ handle_device_list """
         if schema.result != 0:
-            raise Exception('device list error ({})'.format(hex(schema.result)))
+            raise Exception(f'device list error ({ hex(schema.result) })')
         if schema.body.deviceList.deviceId == 0:
             raise Exception('device not configured on this account')
         self.device.serial_number = schema.body.deviceList.serialNumber
@@ -135,6 +137,10 @@ class Client(Evented):
         self.device.firmware_version = schema.body.deviceList.version
         self.device.controller_version = schema.body.deviceList.ctrlVersion
         self.device.model = schema.body.deviceList.deviceType
+
+    def handle_device_busy(self, schema):
+        """ handle_device_busy """
+        self.device.busy_result = schema.result
 
     def handle_user_kick(self, schema):
         """ handle_user_kick """
@@ -167,9 +173,14 @@ class Client(Evented):
         self.map.charger.x = schema.robotChargeInfo.poseX
         self.map.charger.y = schema.robotChargeInfo.poseY
         self.map.charger.phi = schema.robotChargeInfo.posePhi
-        self.map.robot.x = schema.robotPoseInfo.poseX
-        self.map.robot.y = schema.robotPoseInfo.poseY
-        self.map.robot.phi = schema.robotPoseInfo.posePhi
+        if schema.statusInfo.workingMode not in (
+                1,   # cleaning
+        ):
+            # only apply the position if the robot is docked.
+            # here, it is not updated while cleaning.
+            self.map.robot.x = schema.robotPoseInfo.poseX
+            self.map.robot.y = schema.robotPoseInfo.poseY
+            self.map.robot.phi = schema.robotPoseInfo.posePhi
         self.map.invalidate()
         self.trigger('update_map')
 
@@ -191,8 +202,7 @@ class Client(Evented):
     def on_login(self):
         """ on_login """
         self.get_device_list()
-        self.get_map_info()
-        self.ping()
+        self.ping(first=True)
 
     # methods
 
@@ -215,9 +225,22 @@ class Client(Evented):
         """ disconnect_device """
         self.send('CMSG_DISCONNECT_DEVICE')
 
-    def ping(self):
+    def ping(self, first=False):
         """ ping """
+        if self.pongs < 1 and not first:
+            logger.debug('no response to ping, reconnecting')
+            self.socket.disconnect()
+            return
+
+        self.pongs = 0
         self.send('CMSG_PING')
+
+        timer = self.timer
+        if timer:
+            timer.cancel()
+        timer = threading.Timer(30.0, self.ping)
+        timer.start()
+        self.timer = timer
 
     def set_session(self, session_id, user_id, device_id):
         """ set_session """

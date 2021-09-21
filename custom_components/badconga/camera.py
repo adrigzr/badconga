@@ -24,6 +24,11 @@ class CongaCamera(Camera):
         self.instance.client.on('update_position', self.schedule_update_ha_state)
 
     @property
+    def unique_id(self):
+        serial = self.instance.client.device.serial_number
+        return f"{serial}-camera" if serial else None
+
+    @property
     def name(self):
         return 'Conga'
 

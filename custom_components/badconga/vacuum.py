@@ -2,6 +2,7 @@
 # pylint: disable=unused-argument
 import logging
 from functools import partial
+
 from homeassistant.components.vacuum import (
     VacuumEntity,
     SUPPORT_START,
@@ -14,7 +15,17 @@ from homeassistant.components.vacuum import (
     SUPPORT_LOCATE,
     SUPPORT_MAP
 )
-from .app.const import FAN_MODE_NONE, FAN_MODE_ECO, FAN_MODE_NORMAL, FAN_MODE_TURBO, MODEL_NAME
+
+from .app.const import (
+    FAN_MODE_NONE,
+    FAN_MODE_ECO,
+    FAN_MODE_NORMAL,
+    FAN_MODE_TURBO,
+    MODEL_NAME,
+    STATUS_CODES,
+    BUSY_CODES
+)
+
 from .app.conga import Conga
 from . import DOMAIN
 
@@ -43,6 +54,11 @@ class CongaVacuum(VacuumEntity):
         return 'Conga'
 
     @property
+    def unique_id(self):
+        serial = self.instance.client.device.serial_number
+        return f'{serial}-vacuum' if serial else None
+
+    @property
     def state(self):
         return self.instance.client.device.state
 
@@ -54,20 +70,32 @@ class CongaVacuum(VacuumEntity):
 
     @property
     def state_attributes(self):
+        ftype = self.instance.client.device.type
+        fcode = self.instance.client.device.fault_code
+        extended_status = (
+            STATUS_CODES.get(fcode, fcode) if ftype and fcode else None
+        )
+
+        code = self.instance.client.device.busy_result
+        message = BUSY_CODES.get(code, code) if code else False
+
+        size = self.instance.client.device.clean_size
+        clean_size = f'{ size / 100 } m²' if size else None
+
+        time = self.instance.client.device.clean_time
+        clean_time = f'{ time } min' if size else None
+
+        model = self.instance.client.device.model
+        model = MODEL_NAME.get(model, model)
+
         data = super().state_attributes
         data['clean_mode'] = self.instance.client.device.clean_mode
-        data['robot_x'] = self.instance.client.map.robot.x
-        data['robot_y'] = self.instance.client.map.robot.y
-        data['robot_phi'] = self.instance.client.map.robot.phi
-        data['charger_x'] = self.instance.client.map.charger.x
-        data['charger_y'] = self.instance.client.map.charger.y
-        data['charger_phi'] = self.instance.client.map.charger.phi
-        data['clean_time'] = self.instance.client.device.clean_time
-        data['clean_size'] = self.instance.client.device.clean_size
-        data['name'] = self.instance.client.device.alias
-        data['model'] = MODEL_NAME[self.instance.client.device.model] if (
-            self.instance.client.device.model in MODEL_NAME) else (
-                self.instance.client.device.model)
+        data['extended_status'] = extended_status
+        data['message'] = message
+        data['clean_size'] = clean_size
+        data['clean_time'] = clean_time
+        data['alias'] = self.instance.client.device.alias
+        data['model'] = model
         data['serial'] = self.instance.client.device.serial_number
         data['revision'] = self.instance.client.device.controller_version
         data['firmware'] = self.instance.client.device.firmware_version

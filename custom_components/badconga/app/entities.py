@@ -54,6 +54,7 @@ class Device:
         self.clean_size = None
         self.type = 0
         self.fault_code = None
+        self.busy_result = False
         self.fan_mode: FanMode = FAN_MODE_UNKNOWN
         self.serial_number = None
         self.utc_registered = None
